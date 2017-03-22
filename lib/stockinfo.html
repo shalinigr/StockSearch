@@ -1,0 +1,199 @@
+ <!DOCTYPE html>
+    <html>
+        <head>
+             <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>   
+              <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script>
+              <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script> 
+            <script src="https://code.highcharts.com/stock/highstock.js"></script>
+            <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        </head>
+        <body>
+            
+            <div id ="HistCharts"></div>
+            
+        <script>
+   $(document).ready(function(){
+function getHistoricalCharts(symbolVal){
+var histInput = {"jsonInput":'AAPL'};                 
+           histInput = $.param(histInput);
+               console.log(histInput);
+           $.ajax({
+                type:"GET",
+                url: "http://stockapplication-env.us-west-2.elasticbeanstalk.com/",  
+                datatype:"json",                   
+              data:histInput,
+              success: function( data ) {
+               try{
+                  var objJson = JSON.parse(data);
+               }
+                  catch(err)
+                      {
+
+                          return;
+                      }
+                var ohlc = $.getOHLC(objJson),
+                volume =  $.getVolume(objJson);
+                  console.log(ohlc);
+
+
+                  var groupingUnits = [[
+                      'week',                        
+                      [1]                           
+                  ], [
+                      'month',
+                      [1, 2, 3, 4, 6]
+                  ]];
+    // Create the chart
+    $('#HistCharts').highcharts('StockChart', {
+
+    xAxis: {
+        dateTimeLabelFormats: {
+                hour: '%e. %b<br><span style="font-size: 8px">%H:%M</span>'
+        }
+    },
+
+    rangeSelector: {
+    allButtonsEnabled: true,
+    buttons: [{
+
+    type: 'week',
+    count: 1,
+    text: '1w'
+    }, {
+    type: 'month',
+    count: 1,
+    text: '1m'
+    }, {
+    type: 'month',
+    count: 3,
+    text: '3m'
+    }, {
+    type: 'month',
+    count: 6,
+    text: '6m'
+    }, {
+    type: 'ytd',
+    text: 'YTD'
+    }, {
+    type: 'year',
+    count: 1,
+    text: '1y'
+    }, {
+    type: 'all',
+    text: 'All'
+    }],
+    selected: 0,
+    inputEnabled: false
+    },
+    title: {
+    text: 'AAPL' + ' Stock Value'
+    },
+    yAxis: {
+
+    title: {
+
+        text: 'Stock Value',
+
+    }
+    },
+    series: [{
+    name: 'AAPL' + ' Stock Value',
+    data: ohlc,
+    type: 'area',
+    threshold: null,
+    tooltip: {
+        valueDecimals: 2
+    },
+    fillColor: {
+        linearGradient: {
+                x1: 0,
+                y1: 0,
+                x2: 0,
+                y2: 1
+        },
+        stops: [
+    [0, Highcharts.getOptions().colors[0]],
+    [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+    ]
+    }
+    }],
+         exporting: { enabled: false },
+                        credits: {
+                            enabled:false
+                        }
+                });
+    },
+    error: function (jqXHR, exception) {
+    var msg = '';
+    if (jqXHR.status === 0) {
+        msg = 'Not connect.\n Verify Network.';
+    } else if (jqXHR.status == 404) {
+        msg = 'Requested page not found. [404]';
+    } else if (jqXHR.status == 500) {
+        msg = 'Internal Server Error [500].';
+    } else if (exception === 'parsererror') {
+        msg = 'Requested JSON parse failed.';
+    } else if (exception === 'timeout') {
+        msg = 'Time out error.';
+    } else if (exception === 'abort') {
+        msg = 'Ajax request aborted.';
+    } else {
+        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+    }
+    alert(msg);
+    }
+});
+     $.getOHLC = function(json) {
+        var dates = json.Dates || [];
+        var elements = json.Elements || [];
+        var chartSeries = [];
+
+        if (elements[0]){
+
+        for (var i = 0, datLen = dates.length; i < datLen; i++) {
+            var dat = $.fixDate( dates[i] );
+            var pointData = [
+                dat,
+                elements[0].DataSeries['open'].values[i],
+                elements[0].DataSeries['high'].values[i],
+                elements[0].DataSeries['low'].values[i],
+                elements[0].DataSeries['close'].values[i]
+            ];
+            chartSeries.push( pointData );
+        };
+        }
+        return chartSeries;
+        };
+
+        $.getVolume = function(json) {
+        var dates = json.Dates || [];
+        var elements = json.Elements || [];
+        var chartSeries = [];
+
+        if (elements[1]){
+
+        for (var i = 0, datLen = dates.length; i < datLen; i++) {
+            var dat = $.fixDate( dates[i] );
+            var pointData = [
+                dat,
+                elements[1].DataSeries['volume'].values[i]
+            ];
+            chartSeries.push( pointData );
+        };
+        }
+        return chartSeries;
+        };
+     
+    $.fixDate = function(dateIn) {
+    var dat = new Date(dateIn);
+    return Date.UTC(dat.getFullYear(), dat.getMonth(), dat.getDate());
+    };
+
+
+
+};
+       getHistoricalCharts('AAPL');
+   });
+</script>
+</body>
+</html>
