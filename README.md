@@ -4,6 +4,6 @@ For example, Stock information for Apple can be looked up using Apple or AAPL.</
 Local Storage is used to save search results </br>
 APIs Used: </br>
 * MarkitOnDemand</br>
-*Facebook</br>
-*Bing News</br>
+* Facebook</br>
+* Bing News</br>
 PHP file is stored and used from AWS EC2
