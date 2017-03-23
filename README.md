@@ -2,7 +2,7 @@
 An android application to find stock prices and details, related news and historical chart for companies using company name or Symbols.</br>
 For example, Stock information for Apple can be looked up using Apple or AAPL.</br>
 Local Storage is used to save search results </br>
-PHP file is stored and used from AWS EC2 </br>
+PHP file is stored and used from AWS Elastic Beanstalk </br>
 APIs Used: </br>
 * MarkitOnDemand</br>
 * Facebook</br>
